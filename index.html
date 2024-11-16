@@ -61,6 +61,17 @@
                     <label for="condition" class="block text-sm font-medium form-label">Condition</label>
                     <textarea id="condition" name="condition" rows="3" class="mt-1 block w-full p-2 form-textarea rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
                 </div>
+
+                <!-- Parts Section -->
+                <div id="partsContainer">
+                    <h3 class="text-sm font-medium form-label">Parts</h3>
+                    <div class="flex items-center space-x-2 mb-2" id="part1">
+                        <input type="text" name="part" class="mt-1 block w-full p-2 form-input rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Part Name">
+                        <button type="button" class="bg-red-500 text-white px-2 py-1 rounded-md shadow-sm btn-delete" onclick="removePart('part1')">Delete</button>
+                    </div>
+                </div>
+                <button type="button" id="addPart" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm btn">Add Part</button>
+
                 <div class="flex justify-between">
                     <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm btn">Submit</button>
                     <button type="button" id="viewHistory" class="bg-green-500 text-white px-4 py-2 rounded-md shadow-sm btn">View History</button>
@@ -72,7 +83,7 @@
         </div>
         <div id="history" class="mt-6 bg-white p-6 rounded-lg shadow-lg hidden">
             <h2 class="text-2xl font-bold mb-4 text-gray-800">Repair History</h2>
-            <div id="historyCards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div id="historyCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- History cards will be appended here -->
             </div>
         </div>
@@ -93,6 +104,7 @@
                     <p class="text-sm text-gray-600"><strong>Vehicle Number:</strong> ${item.vehicleNumber}</p>
                     <p class="text-sm text-gray-600"><strong>Date of Repair:</strong> ${item.repairDate}</p>
                     <p class="text-sm text-gray-600"><strong>Condition:</strong> ${item.condition}</p>
+                    <p class="text-sm text-gray-600"><strong>Parts:</strong> ${item.parts.join(', ')}</p>
                     <button class="bg-red-500 text-white px-2 py-1 mt-2 rounded-md shadow-sm btn-delete" onclick="deleteHistory(${index})">Delete</button>
                 `;
                 historyCards.appendChild(newCard);
@@ -105,6 +117,25 @@
             renderHistory();
         }
 
+        function removePart(partId) {
+            const partElement = document.getElementById(partId);
+            partElement.remove();
+        }
+
+        document.getElementById('addPart').addEventListener('click', function() {
+            const partsContainer = document.getElementById('partsContainer');
+            const partCount = partsContainer.children.length - 1; // Exclude the header
+            const newPartId = `part${partCount + 2}`; // Increment part ID
+            const newPartDiv = document.createElement('div');
+            newPartDiv.className = 'flex items-center space-x-2 mb-2';
+            newPartDiv.id = newPartId;
+            newPartDiv.innerHTML = `
+                <input type="text" name="part" class="mt-1 block w-full p-2 form-input rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Part Name">
+                <button type="button" class="bg-red-500 text-white px-2 py-1 rounded-md shadow-sm btn-delete" onclick="removePart('${newPartId}')">Delete</button>
+            `;
+            partsContainer.appendChild(newPartDiv);
+        });
+
         document.getElementById('repairForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const customerName = document.getElementById('customerName').value;
@@ -112,12 +143,20 @@
             const vehicleNumber = document.getElementById('vehicleNumber').value;
             const repairDate = document.getElementById('repairDate').value;
             const condition = document.getElementById('condition').value;
+            const parts = Array.from(document.querySelectorAll('input[name="part"]')).map(input => input.value).filter(value => value);
 
-            repairHistory.push({ customerName, phone, vehicleNumber, repairDate, condition });
+            repairHistory.push({ customerName, phone, vehicleNumber, repairDate, condition, parts });
             localStorage.setItem('repairHistory', JSON.stringify(repairHistory));
             renderHistory();
 
             document.getElementById('repairForm').reset();
+            document.getElementById('partsContainer').innerHTML = `
+                <h3 class="text-sm font-medium form-label">Parts</h3>
+                <div class="flex items-center space-x-2 mb-2" id="part1">
+                    <input type="text" name="part" class="mt-1 block w-full p-2 form-input rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Part Name">
+                    <button type="button" class="bg-red-500 text-white px-2 py-1 rounded-md shadow-sm btn-delete" onclick="removePart('part1')">Delete</button>
+                </div>
+            `;
         });
 
         document.getElementById('viewHistory').addEventListener('click', function() {
