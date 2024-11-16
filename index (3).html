@@ -1,0 +1,144 @@
+<html>
+<head>
+    <title>Mechanical App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        .form-label {
+            color: #4A5568;
+        }
+        .form-input, .form-textarea {
+            border: 1px solid #CBD5E0;
+            transition: border-color 0.3s;
+        }
+        .form-input:focus, .form-textarea:focus {
+            border-color: #3182CE;
+        }
+        .btn {
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #2B6CB0;
+        }
+        .btn-delete:hover {
+            background-color: #C53030;
+        }
+        .search-box {
+            border: 1px solid #CBD5E0;
+            transition: border-color 0.3s;
+        }
+        .search-box:focus {
+            border-color: #3182CE;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="container mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Mechanical App</h1>
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <form id="repairForm" class="space-y-4">
+                <div>
+                    <label for="customerName" class="block text-sm font-medium form-label">Customer Name</label>
+                    <input type="text" id="customerName" name="customerName" class="mt-1 block w-full p-2 form-input rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="phone" class="block text-sm font-medium form-label">Phone</label>
+                    <input type="text" id="phone" name="phone" class="mt-1 block w-full p-2 form-input rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="vehicleNumber" class="block text-sm font-medium form-label">Vehicle Number</label>
+                    <input type="text" id="vehicleNumber" name="vehicleNumber" class="mt-1 block w-full p-2 form-input rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="repairDate" class="block text-sm font-medium form-label">Date of Repair</label>
+                    <input type="date" id="repairDate" name="repairDate" class="mt-1 block w-full p-2 form-input rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="condition" class="block text-sm font-medium form-label">Condition</label>
+                    <textarea id="condition" name="condition" rows="3" class="mt-1 block w-full p-2 form-textarea rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                </div>
+                <div class="flex justify-between">
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm btn">Submit</button>
+                    <button type="button" id="viewHistory" class="bg-green-500 text-white px-4 py-2 rounded-md shadow-sm btn">View History</button>
+                </div>
+            </form>
+        </div>
+        <div class="mt-6">
+            <input type="text" id="searchBox" placeholder="Search by Vehicle Number or Customer Name" class="mt-1 block w-full p-2 search-box rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+        </div>
+        <div id="history" class="mt-6 bg-white p-6 rounded-lg shadow-lg hidden">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Repair History</h2>
+            <div id="historyCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- History cards will be appended here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let repairHistory = JSON.parse(localStorage.getItem('repairHistory')) || [];
+
+        function renderHistory() {
+            const historyCards = document.getElementById('historyCards');
+            historyCards.innerHTML = '';
+            repairHistory.forEach((item, index) => {
+                const newCard = document.createElement('div');
+                newCard.className = 'bg-gray-100 p-4 rounded-lg shadow-md';
+                newCard.innerHTML = `
+                    <h3 class="text-lg font-bold text-gray-800">${item.customerName}</h3>
+                    <p class="text-sm text-gray-600"><strong>Phone:</strong> ${item.phone}</p>
+                    <p class="text-sm text-gray-600"><strong>Vehicle Number:</strong> ${item.vehicleNumber}</p>
+                    <p class="text-sm text-gray-600"><strong>Date of Repair:</strong> ${item.repairDate}</p>
+                    <p class="text-sm text-gray-600"><strong>Condition:</strong> ${item.condition}</p>
+                    <button class="bg-red-500 text-white px-2 py-1 mt-2 rounded-md shadow-sm btn-delete" onclick="deleteHistory(${index})">Delete</button>
+                `;
+                historyCards.appendChild(newCard);
+            });
+        }
+
+        function deleteHistory(index) {
+            repairHistory.splice(index, 1);
+            localStorage.setItem('repairHistory', JSON.stringify(repairHistory));
+            renderHistory();
+        }
+
+        document.getElementById('repairForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const customerName = document.getElementById('customerName').value;
+            const phone = document.getElementById('phone').value;
+            const vehicleNumber = document.getElementById('vehicleNumber').value;
+            const repairDate = document.getElementById('repairDate').value;
+            const condition = document.getElementById('condition').value;
+
+            repairHistory.push({ customerName, phone, vehicleNumber, repairDate, condition });
+            localStorage.setItem('repairHistory', JSON.stringify(repairHistory));
+            renderHistory();
+
+            document.getElementById('repairForm').reset();
+        });
+
+        document.getElementById('viewHistory').addEventListener('click', function() {
+            document.getElementById('history').classList.toggle('hidden');
+        });
+
+        document.getElementById('searchBox').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const cards = document.querySelectorAll('#historyCards > div');
+            cards.forEach(card => {
+                const customerName = card.querySelector('h3').textContent.toLowerCase();
+                const vehicleNumber = card.querySelector('p:nth-child(3)').textContent.toLowerCase();
+                if (customerName.includes(searchTerm) || vehicleNumber.includes(searchTerm)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', renderHistory);
+    </script>
+</body>
+</html>
