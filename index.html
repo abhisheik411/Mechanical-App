@@ -1,183 +1,581 @@
-<html>
-<head>
-    <title>Mechanical App</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-        }
-        .form-label {
-            color: #4A5568;
-        }
-        .form-input, .form-textarea {
-            border: 1px solid #CBD5E0;
-            transition: border-color 0.3s;
-        }
-        .form-input:focus, .form-textarea:focus {
-            border-color: #3182CE;
-        }
-        .btn {
-            transition: background-color 0.3s;
-        }
-        .btn:hover {
-            background-color: #2B6CB0;
-        }
-        .btn-delete:hover {
-            background-color: #C53030;
-        }
-        .search-box {
-            border: 1px solid #CBD5E0;
-            transition: border-color 0.3s;
-        }
-        .search-box:focus {
-            border-color: #3182CE;
-        }
-    </style>
-</head>
-<body class="bg-gray-100 p-6">
-    <div class="container mx-auto">
-        <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Mechanical App</h1>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-            <form id="repairForm" class="space-y-4">
-                <div>
-                    <label for="customerName" class="block text-sm font-medium form-label">Customer Name</label>
-                    <input type="text" id="customerName" name="customerName" class="mt-1 block w-full p-2 form-input rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="phone" class="block text-sm font-medium form-label">Phone</label>
-                    <input type="text" id="phone" name="phone" class="mt-1 block w-full p-2 form-input rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="vehicleNumber" class="block text-sm font-medium form-label">Vehicle Number</label>
-                    <input type="text" id="vehicleNumber" name="vehicleNumber" class="mt-1 block w-full p-2 form-input rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="repairDate" class="block text-sm font-medium form-label">Date of Repair</label>
-                    <input type="date" id="repairDate" name="repairDate" class="mt-1 block w-full p-2 form-input rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                </div>
-                <div>
-                    <label for="condition" class="block text-sm font-medium form-label">Condition</label>
-                    <textarea id="condition" name="condition" rows="3" class="mt-1 block w-full p-2 form-textarea rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
-                </div>
-
-                <!-- Parts Section -->
-                <div id="partsContainer">
-                    <h3 class="text-sm font-medium form-label">Parts</h3>
-                    <div class="flex items-center space-x-2 mb-2" id="part1">
-                        <input type="text" name="part" class="mt-1 block w-full p-2 form-input rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Part Name">
-                        <button type="button" class="bg-red-500 text-white px-2 py-1 rounded-md shadow-sm btn-delete" onclick="removePart('part1')">Delete</button>
-                    </div>
-                </div>
-                <button type="button" id="addPart" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm btn">Add Part</button>
-
-                <div class="flex justify-between">
-                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm btn">Submit</button>
-                    <button type="button" id="viewHistory" class="bg-green-500 text-white px-4 py-2 rounded-md shadow-sm btn">View History</button>
-                </div>
-            </form>
-        </div>
-        <div class="mt-6">
-            <input type="text" id="searchBox" placeholder="Search by Vehicle Number or Customer Name" class="mt-1 block w-full p-2 search-box rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-        </div>
-        <div id="history" class="mt-6 bg-white p-6 rounded-lg shadow-lg hidden">
-            <h2 class="text-2xl font-bold mb-4 text-gray-800">Repair History</h2>
-            <div id="historyCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- History cards will be appended here -->
-            </div>
-        </div>
+<html class="scroll-smooth" lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>The Mechanic - Customer & Repair Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+   body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+ </head>
+ <body class="bg-gray-50 min-h-screen flex flex-col">
+  <header class="bg-blue-700 text-white p-4 flex justify-between items-center">
+   <h1 class="text-2xl font-semibold">The Mechanic</h1>
+   <nav class="flex items-center space-x-4">
+    <div class="hidden items-center space-x-2" id="profileInfo">
+     <img alt="User profile avatar icon, generic silhouette in blue circle background" class="w-8 h-8 rounded-full border-2 border-white" height="32" src="https://storage.googleapis.com/a1aa/image/4e5502fa-23da-419c-8d9a-3b8f8f6e671d.jpg" width="32"/>
+     <span class="font-medium" id="profileUsername"></span>
     </div>
+    <button class="hidden bg-red-600 hover:bg-red-700 px-3 py-1 rounded transition flex items-center" id="logoutBtn">
+     <i class="fas fa-sign-out-alt mr-1"></i> Logout
+    </button>
+   </nav>
+  </header>
+  <main class="flex-grow container mx-auto p-4 max-w-5xl">
+   <!-- Login / Signup Container -->
+   <section class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md" id="authSection">
+    <h2 class="text-xl font-semibold mb-4 text-center">Sign In / Sign Up</h2>
+    <form class="space-y-4" id="authForm">
+     <div>
+      <label class="block mb-1 font-medium" for="username">Username</label>
+      <input autocomplete="username" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" id="username" name="username" placeholder="Enter your username" required="" type="text"/>
+     </div>
+     <div>
+      <label class="block mb-1 font-medium" for="password">Password</label>
+      <input autocomplete="new-password" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" id="password" name="password" placeholder="Enter your password" required="" type="password"/>
+     </div>
+     <div>
+      <label class="block mb-1 font-medium" for="securityQuestion">Security Question</label>
+      <select class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" id="securityQuestion" name="securityQuestion" required="">
+       <option value="" disabled="" selected="">Select a security question</option>
+       <option value="mother_maiden">What is your mother's maiden name?</option>
+       <option value="first_pet">What was the name of your first pet?</option>
+       <option value="birth_city">In which city were you born?</option>
+       <option value="favorite_teacher">Who was your favorite teacher?</option>
+       <option value="favorite_color">What is your favorite color?</option>
+      </select>
+     </div>
+     <div>
+      <label class="block mb-1 font-medium" for="securityAnswer">Answer</label>
+      <input autocomplete="off" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" id="securityAnswer" name="securityAnswer" placeholder="Enter answer to security question" required="" type="text"/>
+     </div>
+     <div class="flex justify-between items-center">
+      <button class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded transition" id="loginBtn" type="submit">Login</button>
+      <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition" id="signupBtn" type="button">Sign Up</button>
+     </div>
+    </form>
+    <p class="mt-3 text-center text-sm text-red-600" id="authMessage"></p>
+    <div class="mt-4 text-center">
+     <button class="text-blue-700 hover:underline text-sm" id="forgotPasswordBtn" type="button">Forgot Username or Password?</button>
+    </div>
+   </section>
+   <!-- Forgot Password Section (hidden initially) -->
+   <section class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md mt-6 hidden" id="forgotSection">
+    <h2 class="text-xl font-semibold mb-4 text-center">Recover Account</h2>
+    <form class="space-y-4" id="forgotForm">
+     <div>
+      <label class="block mb-1 font-medium" for="forgotUsername">Enter your Username</label>
+      <input autocomplete="username" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" id="forgotUsername" name="forgotUsername" placeholder="Enter your username" required="" type="text"/>
+     </div>
+     <div id="securityQASection" class="hidden space-y-4">
+      <div>
+       <label class="block mb-1 font-medium" for="forgotSecurityQuestion">Security Question</label>
+       <input class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed" disabled="" id="forgotSecurityQuestion" name="forgotSecurityQuestion" type="text"/>
+      </div>
+      <div>
+       <label class="block mb-1 font-medium" for="forgotSecurityAnswer">Answer</label>
+       <input autocomplete="off" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" id="forgotSecurityAnswer" name="forgotSecurityAnswer" placeholder="Enter answer to security question" type="text"/>
+      </div>
+     </div>
+     <div class="flex justify-between items-center">
+      <button class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded transition" id="recoverBtn" type="submit">Recover Password</button>
+      <button class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded transition" id="cancelRecoverBtn" type="button">Cancel</button>
+     </div>
+    </form>
+    <p class="mt-3 text-center text-sm text-red-600" id="forgotMessage"></p>
+   </section>
+   <!-- Main App Section (hidden initially) -->
+   <section class="hidden mt-8" id="appSection">
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
+     <h2 class="text-2xl font-semibold text-gray-800">Customer & Repair Records</h2>
+     <input autocomplete="off" class="w-full md:w-80 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" id="searchInput" placeholder="Search by vehicle number or owner name..." type="text"/>
+    </div>
+    <form class="bg-white p-6 rounded-lg shadow-md mb-8 max-w-3xl" id="recordForm">
+     <h3 class="text-xl font-semibold mb-4 text-gray-700">Add Repair Record</h3>
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+       <label class="block mb-1 font-medium" for="customerName">Customer Name</label>
+       <input class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" id="customerName" name="customerName" placeholder="Enter customer name" required="" type="text"/>
+      </div>
+      <div>
+       <label class="block mb-1 font-medium" for="phone">Phone Number</label>
+       <input class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" id="phone" name="phone" pattern="^\+?\d{7,15}$" placeholder="+1234567890" required="" type="tel"/>
+      </div>
+      <div>
+       <label class="block mb-1 font-medium" for="vehicleNumber">Vehicle Number</label>
+       <input class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" id="vehicleNumber" name="vehicleNumber" placeholder="Enter vehicle number" required="" type="text"/>
+      </div>
+      <div>
+       <label class="block mb-1 font-medium" for="repairDate">Date of Repair</label>
+       <input class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" id="repairDate" max="" name="repairDate" required="" type="date"/>
+      </div>
+     </div>
+     <div class="mt-4">
+      <label class="block mb-1 font-medium">Parts Repaired</label>
+      <div class="space-y-3" id="partsContainer">
+       <div class="flex gap-2 items-center">
+        <input class="flex-grow border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" name="partName" placeholder="Part name" required="" type="text"/>
+        <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition" id="addPartBtn" title="Add another part" type="button"><i class="fas fa-plus"></i></button>
+       </div>
+      </div>
+     </div>
+     <div class="mt-6 flex justify-end">
+      <button class="bg-green-700 hover:bg-green-800 text-white px-5 py-2 rounded transition" type="submit">Add Record</button>
+     </div>
+     <p class="mt-3 text-sm text-red-600" id="formMessage"></p>
+    </form>
+    <section>
+     <h3 class="text-xl font-semibold mb-4 text-gray-700">Records List</h3>
+     <div class="overflow-x-auto bg-white rounded-lg shadow-md">
+      <table class="min-w-full divide-y divide-gray-200" id="recordsTable">
+       <thead class="bg-blue-700 text-white">
+        <tr>
+         <th class="px-4 py-2 text-left text-sm font-semibold">Customer Name</th>
+         <th class="px-4 py-2 text-left text-sm font-semibold">Phone</th>
+         <th class="px-4 py-2 text-left text-sm font-semibold">Vehicle Number</th>
+         <th class="px-4 py-2 text-left text-sm font-semibold">Date of Repair</th>
+         <th class="px-4 py-2 text-left text-sm font-semibold">Parts Repaired</th>
+         <th class="px-4 py-2 text-center text-sm font-semibold">Actions</th>
+        </tr>
+       </thead>
+       <tbody class="divide-y divide-gray-200" id="recordsBody"></tbody>
+      </table>
+      <p class="p-4 text-center text-gray-500 hidden" id="noRecordsMsg">No records found.</p>
+     </div>
+    </section>
+   </section>
+  </main>
+  <footer class="bg-blue-700 text-white text-center p-4 mt-auto">© 2024 The Mechanic. All rights reserved.</footer>
+  <script>
+   // Set max date for repairDate input to today
+    const repairDateInput = document.getElementById('repairDate');
+    repairDateInput.max = new Date().toISOString().split('T')[0];
 
-    <script>
-        let repairHistory = JSON.parse(localStorage.getItem('repairHistory')) || [];
+    // Elements
+    const authSection = document.getElementById('authSection');
+    const forgotSection = document.getElementById('forgotSection');
+    const appSection = document.getElementById('appSection');
+    const authForm = document.getElementById('authForm');
+    const forgotForm = document.getElementById('forgotForm');
+    const loginBtn = document.getElementById('loginBtn');
+    const signupBtn = document.getElementById('signupBtn');
+    const authMessage = document.getElementById('authMessage');
+    const forgotMessage = document.getElementById('forgotMessage');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const profileInfo = document.getElementById('profileInfo');
+    const profileUsername = document.getElementById('profileUsername');
+    const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+    const cancelRecoverBtn = document.getElementById('cancelRecoverBtn');
+    const securityQASection = document.getElementById('securityQASection');
+    const forgotSecurityQuestion = document.getElementById('forgotSecurityQuestion');
+    const forgotSecurityAnswer = document.getElementById('forgotSecurityAnswer');
+    const forgotUsernameInput = document.getElementById('forgotUsername');
 
-        function renderHistory() {
-            const historyCards = document.getElementById('historyCards');
-            historyCards.innerHTML = '';
-            repairHistory.forEach((item, index) => {
-                const newCard = document.createElement('div');
-                newCard.className = 'bg-gray-100 p-4 rounded-lg shadow-md';
-                newCard.innerHTML = `
-                    <h3 class="text-lg font-bold text-gray-800">${item.customerName}</h3>
-                    <p class="text-sm text-gray-600"><strong>Phone:</strong> ${item.phone}</p>
-                    <p class="text-sm text-gray-600"><strong>Vehicle Number:</strong> ${item.vehicleNumber}</p>
-                    <p class="text-sm text-gray-600"><strong>Date of Repair:</strong> ${item.repairDate}</p>
-                    <p class="text-sm text-gray-600"><strong>Condition:</strong> ${item.condition}</p>
-                    <p class="text-sm text-gray-600"><strong>Parts:</strong> ${item.parts.join(', ')}</p>
-                    <button class="bg-red-500 text-white px-2 py-1 mt-2 rounded-md shadow-sm btn-delete" onclick="deleteHistory(${index})">Delete</button>
-                `;
-                historyCards.appendChild(newCard);
-            });
-        }
+    const recordForm = document.getElementById('recordForm');
+    const partsContainer = document.getElementById('partsContainer');
+    const addPartBtn = document.getElementById('addPartBtn');
+    const recordsBody = document.getElementById('recordsBody');
+    const noRecordsMsg = document.getElementById('noRecordsMsg');
+    const searchInput = document.getElementById('searchInput');
+    const formMessage = document.getElementById('formMessage');
 
-        function deleteHistory(index) {
-            repairHistory.splice(index, 1);
-            localStorage.setItem('repairHistory', JSON.stringify(repairHistory));
-            renderHistory();
-        }
+    // Current logged in user
+    let currentUser = null;
 
-        function removePart(partId) {
-            const partElement = document.getElementById(partId);
-            partElement.remove();
-        }
+    // Utility: Save users to localStorage
+    function saveUsers(users) {
+      localStorage.setItem('mechanicUsers', JSON.stringify(users));
+    }
 
-        document.getElementById('addPart').addEventListener('click', function() {
-            const partsContainer = document.getElementById('partsContainer');
-            const partCount = partsContainer.children.length - 1; // Exclude the header
-            const newPartId = `part${partCount + 2}`; // Increment part ID
-            const newPartDiv = document.createElement('div');
-            newPartDiv.className = 'flex items-center space-x-2 mb-2';
-            newPartDiv.id = newPartId;
-            newPartDiv.innerHTML = `
-                <input type="text" name="part" class="mt-1 block w-full p-2 form-input rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Part Name">
-                <button type="button" class="bg-red-500 text-white px-2 py-1 rounded-md shadow-sm btn-delete" onclick="removePart('${newPartId}')">Delete</button>
-            `;
-            partsContainer.appendChild(newPartDiv);
+    // Utility: Load users from localStorage
+    function loadUsers() {
+      const users = localStorage.getItem('mechanicUsers');
+      return users ? JSON.parse(users) : {};
+    }
+
+    // Utility: Save records for a user
+    function saveRecords(username, records) {
+      localStorage.setItem(`mechanicRecords_${username}`, JSON.stringify(records));
+    }
+
+    // Utility: Load records for a user
+    function loadRecords(username) {
+      const records = localStorage.getItem(`mechanicRecords_${username}`);
+      return records ? JSON.parse(records) : [];
+    }
+
+    // Show message helper
+    function showMessage(element, message, isError = true) {
+      element.textContent = message;
+      element.style.color = isError ? '#dc2626' : '#16a34a'; // red or green
+      if (message) {
+        setTimeout(() => {
+          element.textContent = '';
+        }, 4000);
+      }
+    }
+
+    // Clear parts inputs except the first one
+    function clearPartsInputs() {
+      while (partsContainer.children.length > 1) {
+        partsContainer.removeChild(partsContainer.lastChild);
+      }
+      partsContainer.querySelector('input[name="partName"]').value = '';
+    }
+
+    // Add a new part input row
+    function addPartInput() {
+      const div = document.createElement('div');
+      div.className = 'flex gap-2 items-center';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.name = 'partName';
+      input.required = true;
+      input.placeholder = 'Part name';
+      input.className = 'flex-grow border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500';
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition';
+      removeBtn.title = 'Remove this part';
+      removeBtn.innerHTML = '<i class="fas fa-minus"></i>';
+      removeBtn.addEventListener('click', () => {
+        partsContainer.removeChild(div);
+      });
+
+      div.appendChild(input);
+      div.appendChild(removeBtn);
+      partsContainer.appendChild(div);
+    }
+
+    // Render records table for current user with optional filter
+    function renderRecords(filter = '') {
+      const records = loadRecords(currentUser);
+      const filtered = records.filter((rec) => {
+        const searchTerm = filter.toLowerCase();
+        return (
+          rec.customerName.toLowerCase().includes(searchTerm) ||
+          rec.vehicleNumber.toLowerCase().includes(searchTerm)
+        );
+      });
+
+      recordsBody.innerHTML = '';
+      if (filtered.length === 0) {
+        noRecordsMsg.classList.remove('hidden');
+        return;
+      } else {
+        noRecordsMsg.classList.add('hidden');
+      }
+
+      filtered.forEach((rec, index) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-100';
+
+        const tdName = document.createElement('td');
+        tdName.className = 'px-4 py-2 whitespace-nowrap text-sm text-gray-700';
+        tdName.textContent = rec.customerName;
+
+        const tdPhone = document.createElement('td');
+        tdPhone.className = 'px-4 py-2 whitespace-nowrap text-sm text-gray-700';
+        tdPhone.textContent = rec.phone;
+
+        const tdVehicle = document.createElement('td');
+        tdVehicle.className = 'px-4 py-2 whitespace-nowrap text-sm text-gray-700';
+        tdVehicle.textContent = rec.vehicleNumber;
+
+        const tdDate = document.createElement('td');
+        tdDate.className = 'px-4 py-2 whitespace-nowrap text-sm text-gray-700';
+        tdDate.textContent = rec.repairDate;
+
+        const tdParts = document.createElement('td');
+        tdParts.className = 'px-4 py-2 whitespace-nowrap text-sm text-gray-700';
+        tdParts.textContent = rec.parts.join(', ');
+
+        const tdActions = document.createElement('td');
+        tdActions.className = 'px-4 py-2 whitespace-nowrap text-center text-sm';
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'text-red-600 hover:text-red-800 transition';
+        delBtn.title = 'Delete record';
+        delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+        delBtn.addEventListener('click', () => {
+          if (confirm(`Are you sure you want to delete the record for "${rec.customerName}"?`)) {
+            deleteRecord(index);
+          }
         });
 
-        document.getElementById('repairForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const customerName = document.getElementById('customerName').value;
-            const phone = document.getElementById('phone').value;
-            const vehicleNumber = document.getElementById('vehicleNumber').value;
-            const repairDate = document.getElementById('repairDate').value;
-            const condition = document.getElementById('condition').value;
-            const parts = Array.from(document.querySelectorAll('input[name="part"]')).map(input => input.value).filter(value => value);
+        tdActions.appendChild(delBtn);
 
-            repairHistory.push({ customerName, phone, vehicleNumber, repairDate, condition, parts });
-            localStorage.setItem('repairHistory', JSON.stringify(repairHistory));
-            renderHistory();
+        tr.appendChild(tdName);
+        tr.appendChild(tdPhone);
+        tr.appendChild(tdVehicle);
+        tr.appendChild(tdDate);
+        tr.appendChild(tdParts);
+        tr.appendChild(tdActions);
 
-            document.getElementById('repairForm').reset();
-            document.getElementById('partsContainer').innerHTML = `
-                <h3 class="text-sm font-medium form-label">Parts</h3>
-                <div class="flex items-center space-x-2 mb-2" id="part1">
-                    <input type="text" name="part" class="mt-1 block w-full p-2 form-input rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Part Name">
-                    <button type="button" class="bg-red-500 text-white px-2 py-1 rounded-md shadow-sm btn-delete" onclick="removePart('part1')">Delete</button>
-                </div>
-            `;
-        });
+        recordsBody.appendChild(tr);
+      });
+    }
 
-        document.getElementById('viewHistory').addEventListener('click', function() {
-            document.getElementById('history').classList.toggle('hidden');
-        });
+    // Delete record by index
+    function deleteRecord(index) {
+      const records = loadRecords(currentUser);
+      if (index >= 0 && index < records.length) {
+        records.splice(index, 1);
+        saveRecords(currentUser, records);
+        renderRecords(searchInput.value.trim());
+        showMessage(formMessage, 'Record deleted successfully!', false);
+      }
+    }
 
-        document.getElementById('searchBox').addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const cards = document.querySelectorAll('#historyCards > div');
-            cards.forEach(card => {
-                const customerName = card.querySelector('h3').textContent.toLowerCase();
-                const vehicleNumber = card.querySelector('p:nth-child(3)').textContent.toLowerCase();
-                if (customerName.includes(searchTerm) || vehicleNumber.includes(searchTerm)) {
-                    card.style.display = '';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
+    // Update profile info display
+    function updateProfileInfo() {
+      if (currentUser) {
+        profileUsername.textContent = currentUser;
+        profileInfo.classList.remove('hidden');
+      } else {
+        profileUsername.textContent = '';
+        profileInfo.classList.add('hidden');
+      }
+    }
 
-        document.addEventListener('DOMContentLoaded', renderHistory);
-    </script>
-</body>
+    // Handle login
+    authForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = authForm.username.value.trim();
+      const password = authForm.password.value;
+
+      if (!username || !password) {
+        showMessage(authMessage, 'Please enter username and password.');
+        return;
+      }
+
+      const users = loadUsers();
+      if (!users[username]) {
+        showMessage(authMessage, 'User does not exist. Please sign up first.');
+        return;
+      }
+
+      if (users[username].password !== password) {
+        showMessage(authMessage, 'Incorrect password.');
+        return;
+      }
+
+      // Successful login
+      currentUser = username;
+      authSection.classList.add('hidden');
+      forgotSection.classList.add('hidden');
+      appSection.classList.remove('hidden');
+      logoutBtn.classList.remove('hidden');
+      authMessage.textContent = '';
+      forgotMessage.textContent = '';
+      authForm.reset();
+      clearPartsInputs();
+      renderRecords();
+      updateProfileInfo();
+    });
+
+    // Handle signup
+    signupBtn.addEventListener('click', () => {
+      const username = authForm.username.value.trim();
+      const password = authForm.password.value;
+      const securityQuestion = authForm.securityQuestion.value;
+      const securityAnswer = authForm.securityAnswer.value.trim();
+
+      if (!username || !password || !securityQuestion || !securityAnswer) {
+        showMessage(authMessage, 'Please fill in all fields including security question and answer.');
+        return;
+      }
+
+      const users = loadUsers();
+      if (users[username]) {
+        showMessage(authMessage, 'Username already exists. Please choose another.');
+        return;
+      }
+
+      users[username] = {
+        password,
+        securityQuestion,
+        securityAnswer: securityAnswer.toLowerCase(),
+      };
+      saveUsers(users);
+      showMessage(authMessage, 'Sign up successful! You can now log in.', false);
+      authForm.reset();
+    });
+
+    // Handle logout
+    logoutBtn.addEventListener('click', () => {
+      currentUser = null;
+      authSection.classList.remove('hidden');
+      forgotSection.classList.add('hidden');
+      appSection.classList.add('hidden');
+      logoutBtn.classList.add('hidden');
+      authMessage.textContent = '';
+      forgotMessage.textContent = '';
+      formMessage.textContent = '';
+      authForm.reset();
+      forgotForm.reset();
+      recordForm.reset();
+      clearPartsInputs();
+      searchInput.value = '';
+      updateProfileInfo();
+    });
+
+    // Add part input button
+    addPartBtn.addEventListener('click', () => {
+      addPartInput();
+    });
+
+    // Handle add record form submit
+    recordForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      formMessage.textContent = '';
+
+      const customerName = recordForm.customerName.value.trim();
+      const phone = recordForm.phone.value.trim();
+      const vehicleNumber = recordForm.vehicleNumber.value.trim();
+      const repairDate = recordForm.repairDate.value;
+
+      if (!customerName || !phone || !vehicleNumber || !repairDate) {
+        showMessage(formMessage, 'Please fill in all required fields.');
+        return;
+      }
+
+      // Validate phone pattern
+      const phonePattern = /^\+?\d{7,15}$/;
+      if (!phonePattern.test(phone)) {
+        showMessage(formMessage, 'Please enter a valid phone number (7-15 digits, optional +).');
+        return;
+      }
+
+      // Collect parts
+      const partInputs = partsContainer.querySelectorAll('input[name="partName"]');
+      const parts = [];
+      for (const input of partInputs) {
+        const val = input.value.trim();
+        if (val) parts.push(val);
+      }
+      if (parts.length === 0) {
+        showMessage(formMessage, 'Please add at least one part repaired.');
+        return;
+      }
+
+      // Save record
+      const records = loadRecords(currentUser);
+      records.push({
+        customerName,
+        phone,
+        vehicleNumber,
+        repairDate,
+        parts,
+      });
+      saveRecords(currentUser, records);
+
+      // Reset form
+      recordForm.reset();
+      clearPartsInputs();
+      renderRecords(searchInput.value.trim());
+      showMessage(formMessage, 'Record added successfully!', false);
+    });
+
+    // Handle search input
+    searchInput.addEventListener('input', () => {
+      renderRecords(searchInput.value.trim());
+    });
+
+    // Show forgot password section
+    forgotPasswordBtn.addEventListener('click', () => {
+      authSection.classList.add('hidden');
+      forgotSection.classList.remove('hidden');
+      authMessage.textContent = '';
+      forgotMessage.textContent = '';
+      forgotForm.reset();
+      securityQASection.classList.add('hidden');
+      forgotSecurityQuestion.value = '';
+      forgotSecurityAnswer.value = '';
+    });
+
+    // Cancel forgot password
+    cancelRecoverBtn.addEventListener('click', () => {
+      forgotSection.classList.add('hidden');
+      authSection.classList.remove('hidden');
+      forgotMessage.textContent = '';
+      authMessage.textContent = '';
+      forgotForm.reset();
+      securityQASection.classList.add('hidden');
+      forgotSecurityQuestion.value = '';
+      forgotSecurityAnswer.value = '';
+    });
+
+    // When username entered in forgot form, show security question if user exists
+    forgotUsernameInput.addEventListener('input', () => {
+      const username = forgotUsernameInput.value.trim();
+      const users = loadUsers();
+      if (users[username]) {
+        const questionKey = users[username].securityQuestion;
+        const questionText = getSecurityQuestionText(questionKey);
+        forgotSecurityQuestion.value = questionText;
+        securityQASection.classList.remove('hidden');
+      } else {
+        forgotSecurityQuestion.value = '';
+        forgotSecurityAnswer.value = '';
+        securityQASection.classList.add('hidden');
+      }
+      forgotMessage.textContent = '';
+    });
+
+    // Get question text from key
+    function getSecurityQuestionText(key) {
+      switch (key) {
+        case 'mother_maiden': return "What is your mother's maiden name?";
+        case 'first_pet': return "What was the name of your first pet?";
+        case 'birth_city': return "In which city were you born?";
+        case 'favorite_teacher': return "Who was your favorite teacher?";
+        case 'favorite_color': return "What is your favorite color?";
+        default: return '';
+      }
+    }
+
+    // Handle forgot password form submit
+    forgotForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      forgotMessage.textContent = '';
+
+      const username = forgotForm.forgotUsername.value.trim();
+      const answer = forgotForm.forgotSecurityAnswer.value.trim().toLowerCase();
+
+      if (!username) {
+        showMessage(forgotMessage, 'Please enter your username.');
+        return;
+      }
+
+      const users = loadUsers();
+      if (!users[username]) {
+        showMessage(forgotMessage, 'Username not found.');
+        return;
+      }
+
+      if (!answer) {
+        showMessage(forgotMessage, 'Please enter the answer to the security question.');
+        return;
+      }
+
+      if (users[username].securityAnswer !== answer) {
+        showMessage(forgotMessage, 'Incorrect answer to the security question.');
+        return;
+      }
+
+      // For demo, show password in message (not secure in real apps)
+      showMessage(forgotMessage, `Password for "${username}" is: ${users[username].password}`, false);
+    });
+
+    // Initialize with one part input
+    clearPartsInputs();
+  </script>
+ </body>
 </html>
